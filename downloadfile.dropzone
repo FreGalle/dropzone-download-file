@@ -1,0 +1,36 @@
+#!/usr/bin/ruby
+
+# Dropzone Destination Info
+# Name: Download Files
+# Description: Download files
+# Handles: NSStringPboardType
+# Events: Dragged
+# Creator: Frederik G.
+# URL: http://www.example.com
+# IconURL: http://aptonic.com/destinations/icons/network.png
+# OptionsNIB: ChooseFolder
+
+require 'open-uri'
+
+def dragged
+    url = $items[0].chomp
+
+    $dz.determinate(false)
+    $dz.begin("Downloading file...")
+    
+    uri = URI.parse(URI.escape(url))
+    name = uri.path.split(File::SEPARATOR)[-1]
+
+    tmp_file = File.join('/tmp', name)
+
+    open(ENV['EXTRA_PATH'] + File::SEPARATOR + name, 'wb') do |file|
+        tmp_file << open(uri).read
+    end
+
+    $dz.determinate(true)
+    Rsync.do_copy(tmp_file, ENV['EXTRA_PATH'], true)
+
+    $dz.finish("Download complete")
+
+    $dz.url(false)
+end
