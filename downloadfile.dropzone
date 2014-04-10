@@ -14,6 +14,10 @@ require 'open-uri'
 
 def dragged
     url = $items[0].chomp
+    # Make sure the url is encoded properly
+    if url == URI.decode(url)
+        url = URI.encode(url)
+    end
 
     $dz.determinate(false)
     $dz.begin("Downloading file...")
