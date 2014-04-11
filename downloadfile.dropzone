@@ -14,24 +14,30 @@ require 'open-uri'
 
 def dragged
     url = $items[0].chomp
-    # Make sure the url is encoded properly
-    if url == URI.decode(url)
-        url = URI.encode(url)
+
+    if url =~ /^#{URI::regexp}$/
+
+        # Make sure the url is encoded properly
+        if url == URI.decode(url)
+            url = URI.encode(url)
+        end
+
+        $dz.determinate(false)
+        $dz.begin("Downloading file...")
+        
+        uri = URI.parse(url)
+        name = URI.decode(uri.path.split(File::SEPARATOR)[-1])
+
+        filepath = File.join(ENV['EXTRA_PATH'], name)
+
+        open(filepath, 'wb') do |file|
+            file << open(uri).read
+        end
+
+        $dz.finish("Download complete")
+    else
+        $dz.finish("Download failed")
     end
-
-    $dz.determinate(false)
-    $dz.begin("Downloading file...")
-    
-    uri = URI.parse(url)
-    name = URI.decode(uri.path.split(File::SEPARATOR)[-1])
-
-    filepath = File.join(ENV['EXTRA_PATH'], name)
-
-    open(filepath, 'wb') do |file|
-        file << open(uri).read
-    end
-
-    $dz.finish("Download complete")
 
     $dz.url(false)
 end
